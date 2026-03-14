@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mock - JSON Mock Data Generator</title>
+  <meta name="description" content="Generate realistic mock JSON data for testing APIs. Names, emails, UUIDs, timestamps, and custom schemas.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface-2: #1a1a24;
+      --border: #2a2a3a;
+      --text: #e8e8f0;
+      --text-muted: #8888a0;
+      --primary: #6366f1;
+      --primary-hover: #818cf8;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .schema-builder {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.75rem;
+      background: var(--surface-2);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    input, select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.6rem 0.75rem;
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    input::placeholder {
+      color: var(--text-muted);
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-icon {
+      background: transparent;
+      padding: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-icon:hover {
+      background: var(--danger);
+    }
+
+    .btn-success {
+      background: var(--success);
+    }
+
+    .btn-success:hover {
+      background: #16a34a;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      background: var(--surface-2);
+      border-color: var(--primary);
+    }
+
+    .add-field-btn {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    .add-field-btn:hover {
+      background: var(--surface);
+      border-color: var(--primary);
+      color: var(--text);
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .count-input {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface-2);
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .count-input label {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .count-input input {
+      width: 70px;
+      text-align: center;
+    }
+
+    .generate-btn {
+      flex: 1;
+      font-size: 1rem;
+      padding: 0.75rem 1.5rem;
+    }
+
+    .output-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 500px;
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .output-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .output-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .output-area {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.85rem;
+      overflow: auto;
+      white-space: pre;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .json-key { color: #7dd3fc; }
+    .json-string { color: #86efac; }
+    .json-number { color: #fcd34d; }
+    .json-boolean { color: #f472b6; }
+    .json-null { color: var(--text-muted); }
+
+    .presets {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .preset-btn {
+      font-size: 0.8rem;
+      padding: 0.4rem 0.75rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .preset-btn:hover {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--primary);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--success);
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .type-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.4rem;
+      background: var(--surface);
+      border-radius: 4px;
+      color: var(--text-muted);
+      margin-left: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎲 Mock</h1>
+      <p class="subtitle">Generate realistic JSON mock data for testing APIs</p>
+    </header>
+
+    <div class="main-grid">
+      <div class="panel">
+        <h2 class="panel-title">📋 Schema Builder</h2>
+        
+        <div class="presets">
+          <button class="preset-btn" onclick="loadPreset('user')">👤 User</button>
+          <button class="preset-btn" onclick="loadPreset('product')">📦 Product</button>
+          <button class="preset-btn" onclick="loadPreset('order')">🛒 Order</button>
+          <button class="preset-btn" onclick="loadPreset('post')">📝 Post</button>
+          <button class="preset-btn" onclick="loadPreset('company')">🏢 Company</button>
+        </div>
+
+        <div class="schema-builder" id="schemaBuilder">
+          <!-- Field rows will be added here -->
+        </div>
+
+        <button class="add-field-btn" onclick="addField()">+ Add Field</button>
+
+        <div class="controls">
+          <div class="count-input">
+            <label for="recordCount">Records:</label>
+            <input type="number" id="recordCount" value="10" min="1" max="1000">
+          </div>
+          <button class="generate-btn btn-success" onclick="generate()">⚡ Generate</button>
+        </div>
+      </div>
+
+      <div class="panel output-panel">
+        <div class="output-header">
+          <h2 class="panel-title">📄 Output <span class="output-meta" id="outputMeta"></span></h2>
+          <div class="output-actions">
+            <button class="btn-outline" onclick="copyToClipboard()">📋 Copy</button>
+            <button class="btn-outline" onclick="downloadJson()">⬇️ Download</button>
+          </div>
+        </div>
+        <div class="output-area" id="output">
+          <span class="json-null">// Generated data will appear here</span>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Built with ❤️ | <a href="https://github.com/entazis/mock">View Source</a> | Part of <a href="https://entazis.dev">entazis.dev</a></p>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast">Copied to clipboard!</div>
+
+  <script>
+    // Data types and their generators
+    const dataTypes = {
+      'uuid': { label: 'UUID', fn: () => crypto.randomUUID() },
+      'firstName': { label: 'First Name', fn: () => pick(firstNames) },
+      'lastName': { label: 'Last Name', fn: () => pick(lastNames) },
+      'fullName': { label: 'Full Name', fn: () => `${pick(firstNames)} ${pick(lastNames)}` },
+      'email': { label: 'Email', fn: () => `${pick(firstNames).toLowerCase()}.${pick(lastNames).toLowerCase()}@${pick(domains)}` },
+      'username': { label: 'Username', fn: () => `${pick(adjectives)}${pick(nouns)}${randInt(10, 99)}` },
+      'password': { label: 'Password', fn: () => randomString(12) },
+      'phone': { label: 'Phone', fn: () => `+1${randInt(200,999)}${randInt(100,999)}${randInt(1000,9999)}` },
+      'integer': { label: 'Integer', fn: () => randInt(1, 1000) },
+      'float': { label: 'Float', fn: () => +(Math.random() * 1000).toFixed(2) },
+      'boolean': { label: 'Boolean', fn: () => Math.random() > 0.5 },
+      'date': { label: 'Date (ISO)', fn: () => randomDate().toISOString().split('T')[0] },
+      'datetime': { label: 'DateTime (ISO)', fn: () => randomDate().toISOString() },
+      'timestamp': { label: 'Timestamp (Unix)', fn: () => Math.floor(randomDate().getTime() / 1000) },
+      'timestampMs': { label: 'Timestamp (ms)', fn: () => randomDate().getTime() },
+      'age': { label: 'Age (18-80)', fn: () => randInt(18, 80) },
+      'company': { label: 'Company', fn: () => pick(companies) },
+      'jobTitle': { label: 'Job Title', fn: () => pick(jobTitles) },
+      'street': { label: 'Street', fn: () => `${randInt(100, 9999)} ${pick(streetNames)} ${pick(streetSuffixes)}` },
+      'city': { label: 'City', fn: () => pick(cities) },
+      'country': { label: 'Country', fn: () => pick(countries) },
+      'zipCode': { label: 'Zip Code', fn: () => String(randInt(10000, 99999)) },
+      'latitude': { label: 'Latitude', fn: () => +(Math.random() * 180 - 90).toFixed(6) },
+      'longitude': { label: 'Longitude', fn: () => +(Math.random() * 360 - 180).toFixed(6) },
+      'url': { label: 'URL', fn: () => `https://${pick(adjectives)}-${pick(nouns)}.${pick(['com','io','dev','app','co'])}` },
+      'imageUrl': { label: 'Image URL', fn: () => `https://picsum.photos/seed/${randomString(8)}/400/300` },
+      'avatarUrl': { label: 'Avatar URL', fn: () => `https://api.dicebear.com/7.x/avataaars/svg?seed=${randomString(8)}` },
+      'color': { label: 'Color (Hex)', fn: () => `#${Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')}` },
+      'ipv4': { label: 'IPv4', fn: () => `${randInt(1,255)}.${randInt(0,255)}.${randInt(0,255)}.${randInt(1,254)}` },
+      'sentence': { label: 'Sentence', fn: () => pick(sentences) },
+      'paragraph': { label: 'Paragraph', fn: () => Array.from({length: randInt(3,6)}, () => pick(sentences)).join(' ') },
+      'word': { label: 'Word', fn: () => pick([...adjectives, ...nouns]) },
+      'price': { label: 'Price', fn: () => +(Math.random() * 500 + 0.99).toFixed(2) },
+      'currency': { label: 'Currency Code', fn: () => pick(['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD']) },
+      'status': { label: 'Status', fn: () => pick(['active', 'inactive', 'pending', 'completed', 'cancelled']) },
+      'rating': { label: 'Rating (1-5)', fn: () => randInt(1, 5) },
+      'quantity': { label: 'Quantity', fn: () => randInt(1, 100) },
+    };
+
+    // Sample data pools
+    const firstNames = ['James', 'Emma', 'Liam', 'Olivia', 'Noah', 'Ava', 'William', 'Sophia', 'Benjamin', 'Isabella', 'Lucas', 'Mia', 'Henry', 'Charlotte', 'Alexander', 'Amelia', 'Daniel', 'Harper', 'Michael', 'Evelyn', 'Ethan', 'Abigail', 'Sebastian', 'Emily', 'Jack', 'Luna', 'Owen', 'Scarlett', 'Ryan', 'Grace'];
+    const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson'];
+    const domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'example.com', 'company.io', 'work.dev', 'mail.org'];
+    const adjectives = ['quick', 'lazy', 'sleepy', 'noisy', 'hungry', 'brave', 'calm', 'eager', 'fancy', 'gentle', 'happy', 'jolly', 'kind', 'lively', 'nice', 'proud', 'silly', 'witty', 'zealous', 'bright'];
+    const nouns = ['fox', 'dog', 'cat', 'mouse', 'bear', 'wolf', 'tiger', 'lion', 'eagle', 'shark', 'panda', 'koala', 'dragon', 'phoenix', 'unicorn', 'falcon', 'raven', 'otter', 'whale', 'dolphin'];
+    const companies = ['Acme Corp', 'TechFlow', 'DataSphere', 'CloudNine', 'InnovateTech', 'QuantumLeap', 'NexGen', 'ByteForce', 'SkyNet', 'AlphaBeta', 'OmegaSoft', 'ZetaLabs', 'PrimeTech', 'CoreSystems', 'FusionWorks'];
+    const jobTitles = ['Software Engineer', 'Product Manager', 'Data Scientist', 'UX Designer', 'DevOps Engineer', 'Marketing Manager', 'Sales Representative', 'HR Specialist', 'Financial Analyst', 'Project Manager', 'QA Engineer', 'System Administrator', 'Content Writer', 'Business Analyst', 'Customer Success Manager'];
+    const streetNames = ['Main', 'Oak', 'Maple', 'Cedar', 'Pine', 'Elm', 'Washington', 'Lake', 'Hill', 'Park', 'River', 'Forest', 'Spring', 'Valley', 'Sunset'];
+    const streetSuffixes = ['St', 'Ave', 'Blvd', 'Dr', 'Ln', 'Rd', 'Way', 'Ct', 'Pl'];
+    const cities = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'San Jose', 'Austin', 'Seattle', 'Denver', 'Boston', 'Portland', 'Miami', 'Atlanta', 'Nashville', 'Detroit', 'Minneapolis'];
+    const countries = ['United States', 'Canada', 'United Kingdom', 'Germany', 'France', 'Australia', 'Japan', 'Brazil', 'India', 'Mexico', 'Spain', 'Italy', 'Netherlands', 'Sweden', 'Norway'];
+    const sentences = [
+      'The quick brown fox jumps over the lazy dog.',
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      'Innovation distinguishes between a leader and a follower.',
+      'Simplicity is the ultimate sophistication.',
+      'The only way to do great work is to love what you do.',
+      'Stay hungry, stay foolish.',
+      'Think different.',
+      'Move fast and break things.',
+      'Code is poetry.',
+      'First, solve the problem. Then, write the code.',
+    ];
+
+    // Utility functions
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const randomString = len => Array.from({length: len}, () => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[randInt(0, 61)]).join('');
+    const randomDate = () => new Date(Date.now() - randInt(0, 365 * 2 * 24 * 60 * 60 * 1000));
+
+    // Schema state
+    let fields = [];
+    let generatedData = null;
+
+    // Presets
+    const presets = {
+      user: [
+        { name: 'id', type: 'uuid' },
+        { name: 'firstName', type: 'firstName' },
+        { name: 'lastName', type: 'lastName' },
+        { name: 'email', type: 'email' },
+        { name: 'phone', type: 'phone' },
+        { name: 'age', type: 'age' },
+        { name: 'createdAt', type: 'datetime' },
+      ],
+      product: [
+        { name: 'id', type: 'uuid' },
+        { name: 'name', type: 'word' },
+        { name: 'description', type: 'sentence' },
+        { name: 'price', type: 'price' },
+        { name: 'currency', type: 'currency' },
+        { name: 'inStock', type: 'boolean' },
+        { name: 'quantity', type: 'quantity' },
+        { name: 'rating', type: 'rating' },
+        { name: 'imageUrl', type: 'imageUrl' },
+      ],
+      order: [
+        { name: 'orderId', type: 'uuid' },
+        { name: 'customerId', type: 'uuid' },
+        { name: 'status', type: 'status' },
+        { name: 'totalAmount', type: 'price' },
+        { name: 'currency', type: 'currency' },
+        { name: 'itemCount', type: 'quantity' },
+        { name: 'createdAt', type: 'datetime' },
+      ],
+      post: [
+        { name: 'id', type: 'uuid' },
+        { name: 'title', type: 'sentence' },
+        { name: 'content', type: 'paragraph' },
+        { name: 'authorName', type: 'fullName' },
+        { name: 'publishedAt', type: 'datetime' },
+        { name: 'likes', type: 'integer' },
+        { name: 'imageUrl', type: 'imageUrl' },
+      ],
+      company: [
+        { name: 'id', type: 'uuid' },
+        { name: 'name', type: 'company' },
+        { name: 'website', type: 'url' },
+        { name: 'street', type: 'street' },
+        { name: 'city', type: 'city' },
+        { name: 'country', type: 'country' },
+        { name: 'zipCode', type: 'zipCode' },
+        { name: 'employees', type: 'integer' },
+      ],
+    };
+
+    function loadPreset(name) {
+      fields = presets[name].map(f => ({ ...f }));
+      renderFields();
+    }
+
+    function renderFields() {
+      const builder = document.getElementById('schemaBuilder');
+      builder.innerHTML = fields.map((field, idx) => `
+        <div class="field-row">
+          <input type="text" value="${field.name}" placeholder="Field name" 
+                 onchange="updateField(${idx}, 'name', this.value)">
+          <select onchange="updateField(${idx}, 'type', this.value)">
+            ${Object.entries(dataTypes).map(([key, val]) => 
+              `<option value="${key}" ${field.type === key ? 'selected' : ''}>${val.label}</option>`
+            ).join('')}
+          </select>
+          <button class="btn-icon" onclick="removeField(${idx})" title="Remove field">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function addField() {
+      fields.push({ name: `field${fields.length + 1}`, type: 'uuid' });
+      renderFields();
+    }
+
+    function removeField(idx) {
+      fields.splice(idx, 1);
+      renderFields();
+    }
+
+    function updateField(idx, prop, value) {
+      fields[idx][prop] = value;
+    }
+
+    function generate() {
+      const count = Math.min(1000, Math.max(1, parseInt(document.getElementById('recordCount').value) || 10));
+      
+      if (fields.length === 0) {
+        showToast('Add at least one field to generate data');
+        return;
+      }
+
+      generatedData = Array.from({ length: count }, () => {
+        const record = {};
+        fields.forEach(field => {
+          if (field.name && dataTypes[field.type]) {
+            record[field.name] = dataTypes[field.type].fn();
+          }
+        });
+        return record;
+      });
+
+      displayOutput(generatedData);
+      
+      // Track generation event
+      trackEvent('generate', count);
+    }
+
+    function displayOutput(data) {
+      const output = document.getElementById('output');
+      const meta = document.getElementById('outputMeta');
+      
+      const json = JSON.stringify(data, null, 2);
+      const size = new Blob([json]).size;
+      
+      meta.textContent = `(${data.length} records, ${formatBytes(size)})`;
+      output.innerHTML = syntaxHighlight(json);
+    }
+
+    function syntaxHighlight(json) {
+      return json
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+          let cls = 'json-number';
+          if (/^"/.test(match)) {
+            cls = /:$/.test(match) ? 'json-key' : 'json-string';
+          } else if (/true|false/.test(match)) {
+            cls = 'json-boolean';
+          } else if (/null/.test(match)) {
+            cls = 'json-null';
+          }
+          return `<span class="${cls}">${match}</span>`;
+        });
+    }
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function copyToClipboard() {
+      if (!generatedData) {
+        showToast('Generate data first');
+        return;
+      }
+      navigator.clipboard.writeText(JSON.stringify(generatedData, null, 2));
+      showToast('Copied to clipboard!');
+      trackEvent('copy');
+    }
+
+    function downloadJson() {
+      if (!generatedData) {
+        showToast('Generate data first');
+        return;
+      }
+      const blob = new Blob([JSON.stringify(generatedData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mock-data-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      trackEvent('download');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function trackEvent(action, value = 1) {
+      fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          metrics: [{
+            name: 'web_events',
+            type: 'counter',
+            value: 1,
+            labels: { site: 'mock', action, category: 'interaction' }
+          }]
+        })
+      }).catch(() => {});
+    }
+
+    // Initialize
+    loadPreset('user');
+
+    // Page visit tracking
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        metrics: [{
+          name: 'web_page_visits',
+          type: 'counter',
+          value: 1,
+          labels: { site: 'mock', page: location.pathname }
+        }]
+      })
+    }).catch(() => {});
+  </script>
+</body>
+</html>
