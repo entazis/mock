@@ -19,6 +19,11 @@
       --success: #22c55e;
       --danger: #ef4444;
       --warning: #f59e0b;
+      --json-key: #7dd3fc;
+      --json-string: #86efac;
+      --json-number: #fcd34d;
+      --json-boolean: #f472b6;
+      --json-null: #8888a0;
     }
 
     [data-theme="light"] {
@@ -33,6 +38,11 @@
       --success: #16a34a;
       --danger: #dc2626;
       --warning: #d97706;
+      --json-key: #0550ae;
+      --json-string: #0a7d46;
+      --json-number: #9a5e00;
+      --json-boolean: #ab2b8a;
+      --json-null: #6b6b80;
     }
 
     .theme-toggle {
@@ -327,11 +337,11 @@
       line-height: 1.5;
     }
 
-    .json-key { color: #7dd3fc; }
-    .json-string { color: #86efac; }
-    .json-number { color: #fcd34d; }
-    .json-boolean { color: #f472b6; }
-    .json-null { color: var(--text-muted); }
+    .json-key { color: var(--json-key); }
+    .json-string { color: var(--json-string); }
+    .json-number { color: var(--json-number); }
+    .json-boolean { color: var(--json-boolean); }
+    .json-null { color: var(--json-null); }
 
     .presets {
       display: flex;
